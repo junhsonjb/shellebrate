@@ -1,5 +1,7 @@
 /* Ain't no party like a Holy Ghost party, because a Holy Ghost party don't stop! */
 #define SHELL_RL_BUFSIZE 1024
+#define SHELL_TOK_BUFSIZE 64
+#define SHELL_TOK_DELIM " \t\r\n\a"
 
 char * shell_read() {
 
@@ -47,6 +49,47 @@ char * shell_read() {
 
 }
 
+char ** shell_split(char * line) {
+
+    int bufsize = SHELL_TOK_BUFSIZE;
+    int position = 0;
+    char ** tokens = (char **) malloc(bufsize * sizeof(char *));
+    char * token;
+
+    if (!tokens) {
+        fprintf(stderr, "Shellebration: allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    token = strtok(line, SHELL_TOK_DELIM);
+
+    while (token != NULL) {
+
+        tokens[position] = token;
+        position++;
+
+        if (position >= bufsize) {
+
+            bufsize += SHELL_TOK_BUFSIZE;
+            tokens = realloc(tokens, bufsize * sizeof(char *));
+
+            if (!tokens) {
+                fprintf(stderr, "Shellebration: allocation error\n");
+                exit(EXIT_FAILURE);
+            }
+
+        }
+
+        token = strtok(NULL, SHELL_TOK_DELIM);
+
+    }
+
+    // Null terminate the list of char *s (strings)
+    tokens[position] = NULL;
+    return tokens;
+
+}
+
 void shellebrate_loop(void) {
 
     // A few declarations to start the party!
@@ -58,8 +101,8 @@ void shellebrate_loop(void) {
 
         printf(">"); // print a little arrow so the user knows where to enter commands
         line = shell_read(); // read the entered line
-        args = shell_split(); // split the input into arguments
-        status = shell_execute(); // do that thing!
+        args = shell_split(line); // split the input into arguments
+        status = shell_execute(args); // do that thing!
 
         // Free up a little bit of space.
         free(line);
