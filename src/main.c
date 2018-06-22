@@ -1,4 +1,51 @@
 /* Ain't no party like a Holy Ghost party, because a Holy Ghost party don't stop! */
+#define SHELL_RL_BUFSIZE 1024
+
+char * shell_read() {
+
+    int bufsize = SHELL_RL_BUFSIZE;
+    int position = 0;
+    char * buffer  = (char *) malloc(bufsize * sizeof(char));
+    int c;
+
+    // If for some reason buffer comes out NULL print an error and exit with failure
+    if (!buffer) {
+        fprintf(stderr, "Shellebration: allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    while (1) {
+
+        c = getchar();
+
+        if (c == 'EOF' || c == '\n') {
+
+            buffer[position] = '\0';
+            return buffer;
+
+        } else {
+
+            buffer[position] = c;
+
+        }
+
+        position++;
+
+        if (position >= bufsize) {
+
+            bufsize += SHELL_RL_BUFSIZE;
+            buffer = realloc(buffer, bufsize);
+
+            if (!buffer) {
+                fprintf(stderr, "Shellebration: allocation error\n");
+                exit(EXIT_FAILURE);
+            }
+
+        }
+
+    }
+
+}
 
 void shellebrate_loop(void) {
 
@@ -28,6 +75,6 @@ int main(int argc, char** argv) {
     shellebrate_loop();
 
     // Leave that party like a boss
-    return EXIT_SUCCESS
+    exit(EXIT_SUCCESS);
 
 }
