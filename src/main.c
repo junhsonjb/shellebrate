@@ -2,6 +2,9 @@
 #define SHELL_RL_BUFSIZE 1024
 #define SHELL_TOK_BUFSIZE 64
 #define SHELL_TOK_DELIM " \t\r\n\a"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 char * shell_read() {
 
@@ -20,7 +23,7 @@ char * shell_read() {
 
         c = getchar();
 
-        if (c == 'EOF' || c == '\n') {
+        if (c == EOF || c == '\n') {
 
             buffer[position] = '\0';
             return buffer;
@@ -90,6 +93,39 @@ char ** shell_split(char * line) {
 
 }
 
+int lsh_launch(char ** args) {
+
+    pid_t pid, wpid;
+    int status;
+
+    pid = fork();
+
+    if (pid == 0) {
+
+        if (execvp(args[0], args) == -1) {
+            perror("lsh");
+        }
+
+        exit(EXIT_FAILURE);
+
+    } else if (pid < 0) {
+
+        perror("lsh");
+
+    } else {
+
+        do {
+
+            wpid = waitpid(pid, &status, WUNTRACED);
+
+        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+
+    }
+
+    return 1;
+
+}
+
 void shellebrate_loop(void) {
 
     // A few declarations to start the party!
@@ -118,6 +154,6 @@ int main(int argc, char** argv) {
     shellebrate_loop();
 
     // Leave that party like a boss
-    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 
 }
