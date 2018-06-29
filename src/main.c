@@ -98,24 +98,25 @@ int main(int argc, char** argv) {
 
 }
 
-int shell_execute(char ** args) {
+void shellebrate_loop(void) {
 
-    // Handle empty commands
-    if (args[1] == NULL) {
-        return 1;
-    }
+    // A few declarations to start the party!
+    char * line; // store the entered line here
+    char ** args; // store the list of args here
+    int status;
 
-    // Check if the command is one of the builtin in ones and handle it if so
-    for (int i = 0; i < shell_num_builtins(); i++) {
+    do {
 
-        if ( strcmp(args[0], builtins_string[i]) == 0 ) {
-            return (* builtin_func[i]) (args);
-        }
+        printf(">"); // print a little arrow so the user knows where to enter commands
+        line = shell_read(); // read the entered line
+        args = shell_split(line); // split the input into arguments
+        status = shell_execute(args); // do that thing!
 
-    }
+        // Free up a little bit of space.
+        free(line);
+        free(args);
 
-    // Otherwise return the program command (not built in) that was called
-    return shell_launch(args);
+    } while(status);
 
 }
 
@@ -206,6 +207,27 @@ char ** shell_split(char * line) {
 
 }
 
+int shell_execute(char ** args) {
+
+    // Handle empty commands
+    if (args[1] == NULL) {
+        return 1;
+    }
+
+    // Check if the command is one of the builtin in ones and handle it if so
+    for (int i = 0; i < shell_num_builtins(); i++) {
+
+        if ( strcmp(args[0], builtins_string[i]) == 0 ) {
+            return (* builtin_func[i]) (args);
+        }
+
+    }
+
+    // Otherwise return the program command (not built in) that was called
+    return shell_launch(args);
+
+}
+
 int shell_launch(char ** args) {
 
     pid_t pid, wpid;
@@ -236,28 +258,6 @@ int shell_launch(char ** args) {
     }
 
     return 1;
-
-}
-
-void shellebrate_loop(void) {
-
-    // A few declarations to start the party!
-    char * line; // store the entered line here
-    char ** args; // store the list of args here
-    int status;
-
-    do {
-
-        printf(">"); // print a little arrow so the user knows where to enter commands
-        line = shell_read(); // read the entered line
-        args = shell_split(line); // split the input into arguments
-        status = shell_execute(args); // do that thing!
-
-        // Free up a little bit of space.
-        free(line);
-        free(args);
-
-    } while(status);
 
 }
 
